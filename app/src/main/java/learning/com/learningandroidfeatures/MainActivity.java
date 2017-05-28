@@ -1,15 +1,28 @@
 package learning.com.learningandroidfeatures;
 
+import android.graphics.Movie;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
+
+    private final static String API_KEY = "88f5136154b95c85b1be429283bb0b89";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +39,31 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+
+        if (API_KEY.isEmpty()) {
+            Toast.makeText(getApplicationContext(), "Please obtain your API KEY first from weather.org", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        RestService apiService =
+                RestClient.getClient().create(RestService.class);
+
+        Call<WeatherData> call = apiService.getCityWeather("Pune", API_KEY);
+        call.enqueue(new Callback<WeatherData>() {
+            @Override
+            public void onResponse(Call<WeatherData>call, Response<WeatherData> response) {
+                Log.d(TAG, "Weaather Data: " + response.body().toString());
+            }
+
+            @Override
+            public void onFailure(Call<WeatherData>call, Throwable t) {
+                // Log error here since request failed
+                Log.e(TAG, t.toString());
+            }
+        });
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
